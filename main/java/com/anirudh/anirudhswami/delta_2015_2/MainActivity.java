@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 if (name.equals("?")) {
-                    Toast.makeText(MainActivity.this, "Contact Not Found", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Missing", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(MainActivity.this, "Contact Found: " + name, Toast.LENGTH_SHORT).show();
                 }
