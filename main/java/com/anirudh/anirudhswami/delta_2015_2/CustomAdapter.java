@@ -16,8 +16,8 @@ import android.widget.TextView;
  * Created by Anirudh Swami on 15-04-2016.
  */
 public class CustomAdapter extends ArrayAdapter<String> {
-    String[] imags;
-    public CustomAdapter(Context context, String[] names,String[] images) {
+    Bitmap[] imags;
+    public CustomAdapter(Context context, String[] names,Bitmap[] images) {
         super(context, R.layout.custom_row,names);
         this.imags = images;
     }
@@ -34,7 +34,10 @@ public class CustomAdapter extends ArrayAdapter<String> {
 
         tv.setText(currName);
 
-        imageView.setImageResource(R.mipmap.songy1);
+        if(imags[position]==null) imageView.setImageResource(R.mipmap.songy1);
+        else {
+            imageView.setImageBitmap(imags[position]);
+        }
         //Bitmap bm = ;
         //imageView.setImageBitmap();
         return customView;
