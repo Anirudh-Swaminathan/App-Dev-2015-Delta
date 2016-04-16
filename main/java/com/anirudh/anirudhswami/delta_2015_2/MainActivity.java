@@ -2,56 +2,158 @@ package com.anirudh.anirudhswami.delta_2015_2;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
+import android.support.v4.content.res.TypedArrayUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+
+import static java.util.Collections.*;
 
 public class MainActivity extends AppCompatActivity {
 
     //String[] names = {"Anirudh","Abishek"};
     String[] names;
-    String[] images;
+    Bitmap[] images;
+    String order = "DESC";
     List<String> na = new ArrayList<String>();
+    List<Bitmap> im = new ArrayList<>();
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         //Insert my code to put here
-        readContacts();
+        try {
+            readContacts();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         names = new  String[na.size()];
+        images= new Bitmap[im.size()];
         for(int i=0; i<na.size(); ++i){
             names[i] = na.get(i);
+
+        }
+        for(int i=0; i<im.size(); ++i){
+            images[i]=im.get(i);
         }
 
         ListAdapter aniAdapter = new CustomAdapter(MainActivity.this,names,images);
         ListView contList = (ListView) findViewById(R.id.contList);
         contList.setAdapter(aniAdapter);
 
+        ((Button)findViewById(R.id.ser_btn)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String numb = ((TextView) findViewById(R.id.ser_txt)).getText().toString();
 
+                Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(numb));
+                String name = "?";
+
+                ContentResolver contentResolver = getContentResolver();
+                Cursor contactLookup = contentResolver.query(uri, new String[]{BaseColumns._ID,
+                        ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
+
+                try {
+                    if (contactLookup != null && contactLookup.getCount() > 0) {
+                        contactLookup.moveToNext();
+                        name = contactLookup.getString(contactLookup.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
+                        //String contactId = contactLookup.getString(contactLookup.getColumnIndex(BaseColumns._ID));
+                    }
+                } finally {
+                    if (contactLookup != null) {
+                        contactLookup.close();
+                    }
+                }
+                if (name.equals("?")) {
+                    Toast.makeText(MainActivity.this, "Contact Not Found", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Contact Found: " + name, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        ((Button)findViewById(R.id.ord)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Collections.reverse(na);
+                Collections.reverse(im);
+
+                names = new  String[na.size()];
+                images= new Bitmap[im.size()];
+                for(int i=0; i<na.size(); ++i){
+                    names[i] = na.get(i);
+
+                }
+                for(int i=0; i<im.size(); ++i){
+                    images[i]=im.get(i);
+                }
+
+                ListAdapter aniAdapter = new CustomAdapter(MainActivity.this,names,images);
+                ListView contList = (ListView) findViewById(R.id.contList);
+                contList.setAdapter(aniAdapter);
+            }
+        });
     }
 
-    public void readContacts(){
+    public void readContacts() throws IOException {
         ContentResolver cr = getContentResolver();
-        Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null,null,null,null);
+        //Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null,null,null,null);
+
+        Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI, null,
+                ContactsContract.Contacts.HAS_PHONE_NUMBER + " = 1",
+                null,
+                "UPPER(" + ContactsContract.Contacts.DISPLAY_NAME + ") "+order);
+        //String[] projection = new String[]{ContactsContract.Contacts._ID,
+            //    ContactsContract.Contacts.DISPLAY_NAME,
+          //      ContactsContract.RawContacts.ACCOUNT_TYPE};
+        //Cursor cursor = cr.query(ContactsContract.Data.CONTENT_URI,null,null,null,ContactsContract.Contacts.DISPLAY_NAME + " COLLATE LOCALIZED ASC");
+
+
         int ind = 0;
         if(cursor.getCount()>0){
             while(cursor.moveToNext()){
                 String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
                 String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
                 //names[ind] = name;
-                na.add(name);
+                //This is for adding images
+
+                Uri my_contact_Uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, String.valueOf(id));
+                InputStream photo_stream = ContactsContract.Contacts.openContactPhotoInputStream(getContentResolver(), my_contact_Uri);
+                BufferedInputStream buf = new BufferedInputStream(photo_stream);
+                Bitmap my_btmp = BitmapFactory.decodeStream(buf);
+
+                    im.add(my_btmp);
+                    na.add(name);
+
                 ind++;
+                //buf.close();
+                //photo_stream.close();
             }
         }
         cursor.close();
