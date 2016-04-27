@@ -62,10 +62,11 @@ public class Update_data_1 extends AppCompatActivity {
                         Toast.makeText(Update_data_1.this, "Data Updated Successfully", Toast.LENGTH_SHORT).show();
                     else
                         Toast.makeText(Update_data_1.this, "Data could NOT be updated", Toast.LENGTH_SHORT).show();
-                    Intent i = new Intent(Update_data_1.this, MainActivity.class);
+                   
+                }
+                 Intent i = new Intent(Update_data_1.this, MainActivity.class);
                     startActivity(i);
                     finish();
-                }
             }
         });
         upPic.setOnClickListener(new View.OnClickListener() {
