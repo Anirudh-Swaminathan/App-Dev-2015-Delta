@@ -32,7 +32,24 @@
         android:layout_height="wrap_content"
         android:text="Confirm_Update"
         android:id="@+id/confItUp"
-        android:layout_below="@+id/phoneda"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="88dp" />
+        android:layout_marginBottom="97dp" />
+
+    <ImageView
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        android:id="@+id/imageView3"
+        android:layout_below="@+id/phoneda"
+        android:layout_toStartOf="@+id/phoneda"
+        android:layout_marginTop="70dp" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Update Pic"
+        android:id="@+id/upPic"
+        android:layout_alignTop="@+id/imageView3"
+        android:layout_alignParentEnd="true" />
 </RelativeLayout>

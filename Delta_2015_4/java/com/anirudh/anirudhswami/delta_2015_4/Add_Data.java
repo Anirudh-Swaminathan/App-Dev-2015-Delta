@@ -2,15 +2,22 @@ package com.anirudh.anirudhswami.delta_2015_4;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +25,9 @@ public class Add_Data extends AppCompatActivity {
     EditText name;
     EditText number;
     DbHelper AniDb;
+
+    Bitmap bitmap = null;
+    byte[] photo;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,12 +41,28 @@ public class Add_Data extends AppCompatActivity {
             public void onClick(View v) {
                 String na = name.getText().toString();
                 String nu = number.getText().toString();
+
+                //the following is code for image-insertion
+                if(bitmap == null) {
+
+                    bitmap = ((BitmapDrawable) getResources().getDrawable(R.mipmap.ic_launcher)).getBitmap();
+
+                }
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                photo = baos.toByteArray();
+                ByteArrayInputStream imageStream = new ByteArrayInputStream(photo);
+                Bitmap theImage= BitmapFactory.decodeStream(imageStream);
+                ImageView img_here = (ImageView) findViewById(R.id.imageView2);
+                img_here.setImageBitmap(theImage);
+                //stops here
+
                 if(na.equals("")||nu.equals("")){
                     Toast.makeText(Add_Data.this,"Enter a name and number ",Toast.LENGTH_SHORT).show();
                 }
                 else{
-                    boolean inser = AniDb.insertData(na,nu);
-                    if(inser == true){
+                    boolean inser = AniDb.insertData(na,nu,photo);
+                    if(inser){
                         Toast.makeText(Add_Data.this,"Data Inserted SCCESSFULLY!",Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(Add_Data.this,"Data Could'nt be inserted Successfully",Toast.LENGTH_SHORT).show();
@@ -51,34 +77,27 @@ public class Add_Data extends AppCompatActivity {
                 finish();
             }
         });
+        ((Button) findViewById(R.id.tak_pik)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i =new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(i,1);
+            }
+        });
     }
-    public void update(){
-        List<String> namesList = new ArrayList<>();
-        List<String> numberList = new ArrayList<>();
+    @Override
+    protected void onActivityResult(int requestCode,int resultCode,Intent data){
+        super.onActivityResult(requestCode,resultCode,data);
+        if(resultCode == RESULT_OK){
+            Bundle bdn = data.getExtras();
+            Bitmap btm = (Bitmap) bdn.get("data");
+            bitmap = btm;
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            photo = baos.toByteArray();
 
-        String[] names;
-        String[] numbers;
-
-        DbHelper AniDb = new DbHelper(getApplicationContext());
-
-        Cursor res = AniDb.getAllData();
-        if(res.getCount()==0){
-            return;
+            ImageView img_here = (ImageView) findViewById(R.id.imageView2);
+            img_here.setImageBitmap(btm);
         }
-        while (res.moveToNext()){
-            namesList.add(res.getString(0));
-            numberList.add(res.getString(1));
-        }
-
-        names=new String[namesList.size()];
-        numbers = new String[numberList.size()];
-        for(int i=0; i<namesList.size(); ++i){
-            names[i]=namesList.get(i);
-            numbers[i]=numberList.get(i);
-        }
-
-        ListAdapter aniAdapter = new CustomAdapter(getApplicationContext(),names,numbers);
-        ListView contList = (ListView) findViewById(R.id.contList);
-        contList.setAdapter(aniAdapter);
     }
 }

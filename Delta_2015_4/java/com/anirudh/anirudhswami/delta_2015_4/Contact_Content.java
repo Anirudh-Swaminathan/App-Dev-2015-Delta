@@ -13,10 +13,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
+
 public class Contact_Content extends AppCompatActivity {
     ImageView img_here;
     TextView phone;
     Button call,update,delete;
+    Bitmap btm1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +29,7 @@ public class Contact_Content extends AppCompatActivity {
         Intent inta = getIntent();
         Bundle b = inta.getExtras();
         Bitmap btm = (Bitmap) b.get("curri");
+        btm1=btm;
         final String name  = b.getString("name");
         final String number = b.getString("number");
 
@@ -72,8 +76,11 @@ public class Contact_Content extends AppCompatActivity {
         update.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Bitmap bitmap =btm1;
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
                 Intent p = new Intent(Contact_Content.this,Update_data_1.class);
-                p.putExtra("nameIt", name);
+                p.putExtra("nameIt", name).putExtra("img",bitmap).putExtra("numb",number);
                 startActivity(p);
             }
         });

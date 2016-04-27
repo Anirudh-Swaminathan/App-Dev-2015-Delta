@@ -3,6 +3,8 @@ package com.anirudh.anirudhswami.delta_2015_4;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -17,6 +19,8 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,9 +29,11 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     List<String> namesList = new ArrayList<>();
     List<String> numberList = new ArrayList<>();
+    List<Bitmap> imageList = new ArrayList<>();
 
     String[] names;
     String[] numbers;
+    Bitmap[] images;
 
     DbHelper AniDb = new DbHelper(this);
     @Override
@@ -38,12 +44,14 @@ public class MainActivity extends AppCompatActivity {
         getNames();
         names=new String[namesList.size()];
         numbers = new String[numberList.size()];
+        images = new Bitmap[imageList.size()];
         for(int i=0; i<namesList.size(); ++i){
             names[i]=namesList.get(i);
             numbers[i]=numberList.get(i);
+            images[i] = imageList.get(i);
         }
 
-        ListAdapter aniAdapter = new CustomAdapter(MainActivity.this,names,numbers);
+        ListAdapter aniAdapter = new CustomAdapter(MainActivity.this,names,numbers,images);
         ListView contList = (ListView) findViewById(R.id.contList);
         contList.setAdapter(aniAdapter);
 
@@ -72,15 +80,18 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Collections.reverse(namesList);
                 Collections.reverse(numberList);
+                Collections.reverse(imageList);
 
                 names = new String[namesList.size()];
                 numbers = new String[numberList.size()];
+                images=new Bitmap[imageList.size()];
                 for (int i = 0; i < namesList.size(); ++i) {
                     names[i] = namesList.get(i);
                     numbers[i] = numberList.get(i);
+                    images[i] = imageList.get(i);
                 }
 
-                ListAdapter aniAdapter = new CustomAdapter(MainActivity.this, names, numbers);
+                ListAdapter aniAdapter = new CustomAdapter(MainActivity.this, names, numbers,images);
                 ListView contList = (ListView) findViewById(R.id.contList);
                 contList.setAdapter(aniAdapter);
             }
@@ -133,6 +144,17 @@ public class MainActivity extends AppCompatActivity {
         while (res.moveToNext()){
             namesList.add(res.getString(0));
             numberList.add(res.getString(1));
+            //imageList.add(res.getBlob(2));
+            //byte[] blob = res.getBlob(res.getInt(res.getColumnIndex("photo")));
+            //ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            //Bitmap bitmap = ((BitmapDrawable)getResources().getDrawable(R.mipmap.ic_launcher)).getBitmap();
+            //bitmap.compress(Bitmap.CompressFormat.JPEG,100,baos);
+            //byte[] blob = baos.toByteArray();
+
+            byte[] blob = res.getBlob(2);
+            ByteArrayInputStream imageStream = new ByteArrayInputStream(blob);
+            Bitmap theImage= BitmapFactory.decodeStream(imageStream);
+            imageList.add(theImage);
         }
     }
 }
