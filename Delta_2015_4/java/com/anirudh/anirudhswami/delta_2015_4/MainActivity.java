@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
                 ImageView curr_img = (ImageView) view.findViewById(R.id.imageView);
                 String number = numbers[position];
 
-                Toast.makeText(MainActivity.this, "Hi. Thanks for clicking", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "Hi. Thanks for clicking", Toast.LENGTH_SHORT).show();
 
                 curr_img.buildDrawingCache();
                 Bitmap curri = curr_img.getDrawingCache();
